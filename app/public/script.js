@@ -14,13 +14,7 @@ async function registerUser() {
     const loginName = document.getElementById("usernameInputFeldReg").value;
     const passwort = document.getElementById("registerPass").value;
 
-    console.log("Eingaben Username :" , loginName);
-    console.log("Eingaben Passwort :", passwort);
-
     try {
-        console.log("Versuch zu fetchen von endpunkt");
-        // Die Daten die an den Server gefetcht werden
-        console.log("Daten an Server gesendet:", { loginName, passwort, isModerator: false });
         const response = await fetch(`${API_URL}/users/register`, {
             method: "POST",
             headers: {
@@ -29,25 +23,13 @@ async function registerUser() {
             body: JSON.stringify({ loginName, passwort, isModerator: false }),
         });
         const data = await response.json();
-
-        console.log("Statuscode:", response.status);
-        console.log("Antwortdaten:", data);
-        console.log("Sind im Client nach der await response.json() ")
-    
         if (response.ok) {
             localStorage.setItem("userID", data.userid);
             localStorage.setItem("username", data.loginName);
             alert("Registrierung erfolgreich!");
-            if (response.ok) {
-            alert("Registrierung erfolgreich!");
-            document.body.innerHTML = `
-                <h1>Erfolgreich registriert!</h1>
-                <p>Klicken Sie <a href="loginPage.html">hier</a>
-                , um sich einzuloggen.</p>`;
-            }
+            window.location.href = "loginPage.html";
         } else {
             alert(data.error || "Registrierung fehlgeschlagen");
-            console.log("sind im else teil des clients bei einer schlechten Response 400 - 500!");
         }
     } catch (error) {
         console.error("Fehler bei der Registrierung:", error);
@@ -113,27 +95,29 @@ async function enterRoom(action) {
     }
 
     if (action === "join") {
-        const sessionID = document.getElementById("joinRoomID").value;
-        try {
-            const response = await fetch(`${API_URL}/sessions/join`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ sessionID, userID }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem("sessionID", sessionID); // Speichere sessionID
-                alert("Raum erfolgreich beigetreten!");
-                window.location.href = "roomPage.html";
-            } else {
-                alert(data.error || "Fehler beim Beitreten des Raums");
-            }
-        } catch (error) {
-            console.error("Fehler beim Beitreten des Raums:", error);
+    const sessionID = document.getElementById("joinRoomID").value;
+    const passwort = document.getElementById("joinRoomPassword").value; // Passwort hinzufügen
+    try {
+        const response = await fetch(`${API_URL}/sessions/join`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sessionID, userID, passwort }), // Passwort mitsenden
+        });
+        const data = await response.json();
+        if (response.ok) {
+            localStorage.setItem("sessionID", sessionID); // Speichere sessionID
+            alert("Raum erfolgreich beigetreten!");
+            window.location.href = "roomPage.html";
+        } else {
+            alert(data.error || "Fehler beim Beitreten des Raums");
         }
+    } catch (error) {
+        console.error("Fehler beim Beitreten des Raums:", error);
     }
+}
+
 }
 
 // Logout

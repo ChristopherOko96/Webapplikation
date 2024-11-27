@@ -181,18 +181,49 @@ app.post("/api/sessions/create", async (req, res) => {
 
 
 // Sitzung beitreten
-app.post("/api/sessions/join", (req, res) => {
-    const { sessionID, userID , passwort } = req.body;
+app.post("/api/sessions/join", async (req, res) => {
+    const { sessionID, userID, passwort } = req.body;
 
-    const session = sessions[sessionID];
-    const user = users[userID];
+    console.log("Anfrage zum Beitreten einer Sitzung erhalten:", req.body);
 
-    if (!session || !user) {
-        return res.status(404).json({ error: "Sitzung oder Benutzer nicht gefunden" });
+    try {
+        const session = sessions[sessionID];
+        if (!session) {
+            console.log(`Beitritt fehlgeschlagen: Sitzung ${sessionID} nicht gefunden.`);
+            return res.status(404).json({ error: "Sitzung nicht gefunden" });
+        }
+
+        const userSnapshot = await db.collection("users").doc(userID).get();
+        if (!userSnapshot.exists) {
+            console.log(`Beitritt fehlgeschlagen: Benutzer ${userID} nicht gefunden.`);
+            return res.status(404).json({ error: "Benutzer nicht gefunden" });
+        }
+
+        const userData = userSnapshot.data();
+        if (session.passwort !== passwort) {
+            console.log(`Beitritt fehlgeschlagen: Falsches Passwort für Sitzung ${sessionID}.`);
+            return res.status(401).json({ error: "Falsches Passwort" });
+        }
+
+        const user = new User(userData.userid, userData.loginName, userData.passwort, "online");
+        session.addTeilnehmer(user);
+
+        await db.collection("Sitzungen").doc(sessionID).update({
+            aktiveTeilnehmer: session.aktiveTeilnehmer.map((t) => ({
+                userid: t.userid,
+                loginName: t.loginName,
+                status: t.status,
+            })),
+        });
+
+        console.log(`Benutzer ${user.loginName} ist Sitzung ${sessionID} beigetreten.`);
+        console.log("Aktuelle Teilnehmer:", session.aktiveTeilnehmer);
+
+        res.status(200).json(session);
+    } catch (error) {
+        console.error("Fehler beim Beitreten der Sitzung:", error);
+        res.status(500).json({ error: "Fehler beim Beitreten der Sitzung" });
     }
-
-    session.addTeilnehmer(user);
-    res.status(200).json(session);
 });
 
 // Stream hinzufügen
@@ -225,19 +256,20 @@ app.post("/api/streams/remove", (req, res) => {
 
 // WebSocket Signalisierung
 io.on("connection", (socket) => {
-    console.log("Benutzer verbunden:", socket.id);
+    console.log("WebSocket: Benutzer verbunden:", socket.id);
+
+    socket.on("join-session", ({ sessionID, userID }) => {
+        socket.join(sessionID);
+        console.log(`WebSocket: Benutzer ${socket.id} ist Sitzung ${sessionID} beigetreten.`);
+    });
 
     socket.on("signal", (data) => {
+        console.log(`Signal von ${data.from} an ${data.to} empfangen.`);
         io.to(data.to).emit("signal", data);
     });
 
-    socket.on("join-session", (sessionID) => {
-        socket.join(sessionID);
-        console.log(`Benutzer ${socket.id} ist Sitzung ${sessionID} beigetreten`);
-    });
-
     socket.on("disconnect", () => {
-        console.log("Benutzer getrennt:", socket.id);
+        console.log("WebSocket: Benutzer getrennt:", socket.id);
     });
 });
 
