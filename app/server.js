@@ -19,37 +19,103 @@ const users = {};
 const sessions = {};
 const sfuServer = new ServerSfu("SFU-1");
 
+// DB import
+const db = require("./Firebase");
+
 // Benutzerregistrierung
-app.post("/api/users/register", (req, res) => {
+app.post("/api/users/register", async (req, res) => {
     const { loginName, passwort, isModerator } = req.body;
-    const userid = uuidv4();
 
-    let user;
-    if (isModerator) {
-        user = new Moderator(userid, loginName, passwort);
-    } else {
-        user = new User(userid, loginName, passwort);
+    console.log("Daten Empfangen :  " , req.body);
+
+    try {
+        // Überprüfen, ob ein Benutzer mit demselben loginName existiert
+        const userSnapshot = await db
+            .collection("users")
+            .where("loginName", "==", loginName)
+            .get();
+
+        if (!userSnapshot.empty) {
+            // Benutzer existiert bereits
+            return res.status(400).json({ error: "Benutzername existiert bereits" });
+        }
+
+        const userid = uuidv4(); // Generiere eine UUID für den Benutzer
+
+        // Nutzerobjekt erstellen
+        const user = {
+            userid,
+            loginName,
+            passwort, // In der Praxis: Passwörter verschlüsseln
+            role: isModerator ? "Moderator" : "User",
+            createdAt: new Date().toISOString(),
+        };
+
+        // Speichere den Benutzer in Firestore
+        await db.collection("users").doc(userid).set(user);
+
+        // Erfolgsantwort senden
+        res.status(201).json(user);
+    } catch (error) {
+        console.error("Fehler bei der Registrierung:", error);
+        res.status(500).json({ error: "Interner Serverfehler" });
     }
-
-    users[userid] = user;
-    res.status(201).json(user);
 });
+
 
 // Benutzeranmeldung
-app.post("/api/users/login", (req, res) => {
+app.post("/api/users/login", async (req, res) => {
     const { loginName, passwort } = req.body;
 
-    const user = Object.values(users).find(
-        (u) => u.loginName === loginName && u.passwort === passwort
-    );
+    console.log("Req Body: ", req.body);
 
-    if (!user) {
-        return res.status(401).json({ error: "Ungültige Anmeldedaten" });
+    try {
+        // Suche nach dem Benutzer mit dem angegebenen loginName
+        const userSnapshot = await db
+            .collection("users")
+            .where("loginName", "==", loginName)
+            .get();
+
+        if (userSnapshot.empty) {
+            // Benutzer nicht gefunden
+            return res.status(401).json({ error: "Ungültige Anmeldedaten" });
+        }
+
+        // Hole die Benutzerdaten aus der Datenbank
+        const userData = userSnapshot.docs[0].data();
+
+        // Überprüfe das Passwort
+        if (userData.passwort !== passwort) {
+            return res.status(401).json({ error: "Ungültige Anmeldedaten" });
+        }
+
+        // Erstelle eine Instanz der User-Klasse ist momentan nur temporär erzeugt und in die Firestore gespeichert
+        const user = new User(
+            userData.userid,
+            userData.loginName,
+            userData.passwort,
+            "online" // Status wird beim Login auf "online" gesetzt
+        );
+
+        console.log("User Instanz: ", user);
+
+        // Aktualisiere den Status in Firestore
+        await db.collection("users").doc(userData.userid).update({
+            status: "online",
+        });
+
+        // Sende den Benutzer als Antwort zurück
+        res.status(200).json({
+            userid: user.userid,
+            loginName: user.loginName,
+            status: user.status,
+        });
+    } catch (error) {
+        console.error("Fehler bei der Anmeldung: ", error);
+        res.status(500).json({ error: "Interner Serverfehler" });
     }
-
-    user.updateStatus("online");
-    res.status(200).json(user);
 });
+
 
 // Sitzung erstellen
 app.post("/api/sessions/create", (req, res) => {

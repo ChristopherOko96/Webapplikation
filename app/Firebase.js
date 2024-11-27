@@ -1,10 +1,13 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("./path/to/your-service-account-file.json");
+const serviceAccount = require("./config/prototypconnectnow-firebase-adminsdk-p6sqx-c2f280b6a7.json");
 
+// Initialisiere Firebase Admin SDK
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://<your-database-name>.firebaseio.com"
 });
 
+// Zugriff auf Firestore
 const db = admin.firestore();
+
+// Export von DB-Instanz
 module.exports = db;
