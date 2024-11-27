@@ -19,6 +19,7 @@ const users = {};
 const sessions = {};
 const sfuServer = new ServerSfu("SFU-1");
 
+
 // DB import
 const db = require("./Firebase");
 
@@ -47,7 +48,6 @@ app.post("/api/users/register", async (req, res) => {
             userid,
             loginName,
             passwort, // In der Praxis: Passwörter verschlüsseln
-            role: isModerator ? "Moderator" : "User",
             createdAt: new Date().toISOString(),
         };
 
@@ -61,7 +61,6 @@ app.post("/api/users/register", async (req, res) => {
         res.status(500).json({ error: "Interner Serverfehler" });
     }
 });
-
 
 // Benutzeranmeldung
 app.post("/api/users/login", async (req, res) => {
@@ -103,6 +102,9 @@ app.post("/api/users/login", async (req, res) => {
         await db.collection("users").doc(userData.userid).update({
             status: "online",
         });
+        
+        // Hinzufügen von User in Constanten
+        users[0] = user;
 
         // Sende den Benutzer als Antwort zurück
         res.status(200).json({
@@ -116,32 +118,71 @@ app.post("/api/users/login", async (req, res) => {
     }
 });
 
+app.post("/api/sessions/create", async (req, res) => {
+    const { userID, name , passwort } = req.body;
 
-// Sitzung erstellen
-app.post("/api/sessions/create", (req, res) => {
-    const { userID, name, passwort } = req.body;
+    try {
+        // Überprüfen, ob der Benutzer existiert
+        const userSnapshot = await db.collection("users").doc(userID).get();
+        if (!userSnapshot.exists) {
+            return res.status(404).json({ error: "Benutzer nicht gefunden" });
+        }
 
-    if (!users[userID]) {
-        return res.status(404).json({ error: "Benutzer nicht gefunden" });
+        const userData = userSnapshot.data();
+
+        // Generiere eindeutige Sitzung-ID
+        const sessionID = uuidv4();
+
+        // Sitzungsobjekt erstellen
+        const sitzung = new Sitzung(sessionID, name, passwort );
+
+
+        //  Sitzung in Firestore speichern
+        await db.collection("Sitzungen").doc(sessionID).set({
+            sitzungID: sitzung.sitzungID,
+            name: sitzung.name,
+            passwort: sitzung.passwort, 
+            aktiveTeilnehmer: sitzung.aktiveTeilnehmer, // Zunächst leer
+        });
+        console.log("Sitzungsobjekt erstellt und in Firestore gespeichert:", sitzung);
+
+        // 5. Moderator erstellen oder abrufen
+        moderator = new Moderator(
+            userData.userid,
+            userData.loginName,
+            userData.passwort,
+            userData.status || "offline"
+        );
+        console.log(`Moderator erstellt: ${moderator.loginName}`);
+
+
+        // 6. Sitzung zur Liste des Moderators hinzufügen
+        //moderator.createSitzung(sessionID);
+        console.log(`Sitzung ${sessionID} dem Moderator ${moderator.loginName} hinzugefügt.`);
+
+        // 7. Sitzung in temporärem Speicher speichern
+        sessions[sessionID] = sitzung; 
+
+        console.log("Sitzung erstellt:", sitzung);
+
+        // Teilnehmer hinzufügen
+        sitzung.addTeilnehmer(moderator);
+
+        console.log(sitzung);
+        // 8. Erfolgreiche Antwort zurückgeben
+        res.status(201).json(sitzung);
+
+    } catch (error) {
+        // Fehlerbehandlung
+        console.error("Fehler beim Erstellen der Sitzung:", error);
+        res.status(500).json({ message: "Fehler beim Erstellen der Sitzung" });
     }
-
-    const user = users[userID];
-    const sessionID = uuidv4();
-
-    let session;
-    if (user instanceof Moderator) {
-        session = user.createSitzung(new Sitzung(sessionID, name, passwort));
-    } else {
-        session = new Sitzung(sessionID, name, passwort);
-    }
-
-    sessions[sessionID] = session;
-    res.status(201).json(session);
 });
+
 
 // Sitzung beitreten
 app.post("/api/sessions/join", (req, res) => {
-    const { sessionID, userID } = req.body;
+    const { sessionID, userID , passwort } = req.body;
 
     const session = sessions[sessionID];
     const user = users[userID];
