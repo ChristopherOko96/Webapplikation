@@ -1,0 +1,331 @@
+body, html {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+/* Header */
+.header-main {
+    width: 100%;
+    height: 60px;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.name #name {
+    font-size: 24px;
+    color: #007bff; 
+    font-weight: bold;
+}
+
+.name #name:hover {
+    color: red;
+    cursor: pointer;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav #username {
+    color: white;
+    margin-right: 20px;
+    background-color: dimgrey;
+    padding: 10px;
+    border-radius: 70%;
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.nav a:hover {
+    color: #007bff;
+}
+
+
+/* Hauptseite */
+#homePage, #afterLogin, #createPage, #joinPage, #roomPage{
+    height: calc(100vh - 60px);
+    display: flex;
+}
+
+.body-left {
+    background-color: #f0f4ff;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#afterLogin .body-left{
+    background-color: #f0f4ff;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#usernameUnterWilkommen{
+    font-size: 40px;
+    color: black;
+    font-weight: bold;
+    margin: 0;
+}
+
+.body-left h1 {
+    font-size: 50px;
+    color: black;
+    font-weight: bold;
+    margin: 0;
+}
+
+.body-right {
+    background-color: #e0e4ff;
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Login- und Registrierungsformulare */
+.login-container, .creatingContainer {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px;
+}
+
+.login-container button, .creatingContainer button ,#loginPage button ,#registerPage button {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    width: -webkit-fill-available;
+}
+
+.login-container button:hover, .creatingContainer button:hover ,#loginPage button:hover ,#registerPage button:hover{
+    background-color: #333;
+}
+
+#loginPage {
+    margin-top: 200px;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px); /* Höhe des Viewports minus Header */
+    flex-direction: column;
+}
+
+#loginPage h2 {
+    font-size: 52px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#registerPage {
+    margin-top: 200px;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px); /* Höhe des Viewports minus Header */
+    flex-direction: column;
+}
+
+#registerPage h2 {
+    font-size: 52px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.login-data-input {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.login-data-input input, .creatingContainer input {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+}
+
+.login-data-input p, .creatingContainer p {
+    align-self: flex-start;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+}
+
+
+/* Chat und Video */
+.chat-section {
+    background-color: lightgray;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 500px;
+}
+.chat-section h2 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: lightgray;
+    border: 1px solid #ccc;
+    overflow-wrap: anywhere;
+
+}
+
+.chat-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: grey;
+    width: -webkit-fill-available;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: white;
+    border-radius: 100px;
+    width: 350px;
+}
+
+.chat-input button {
+    width: auto;
+    margin-left: 10px;
+    padding: 15px;
+    font-size: 24px;
+    border: none;
+    background-color: lightgray;
+    color: black;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.chat-message {
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 5px;
+    max-width: fit-content;
+    background-color: green;
+    width: -webkit-fill-available;
+}
+
+.video-section {
+    background-color: #e0e4ff;
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden; /* Kein Scrollen für den gesamten Bereich */
+}
+.video-section h2{
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Dynamische Spalten */
+    gap: 10px;
+    width: 100%;
+    max-height: 80vh; /* Begrenzung der Höhe */
+    overflow-y: auto; /* Scrollbar nur für die Videoelemente */
+    padding: 10px;
+}
+
+.video-tile {
+    background-color: black;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 300px; /* Feste Höhe für die Kacheln */
+    max-width: 300px;  /* Feste Breite für die Kacheln */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-tile video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Passt das Video an den Container an */
+}
+.video-tile::before {
+    content: "";
+    display: block;
+    padding-top: 80%;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.controls button {
+    justify-content: space-between;
+    padding: 30px;
+    font-size: 24px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: auto;
+    background-color: darkgray;
+}
+
+#cancelCall {
+    background-color: red;
+}
+
+#cancelCall:hover {
+    background-color: #932b26;
+}
+
+.controls button:hover {
+    background-color: #ddd;
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Now RealTime Conferencing</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-main"> 
+        <div class="name">
+            <a href="afterLogin.html" id="name" onclick="enterRoom('create')">ConnectNow</a>
+        </div>
+        <nav class="nav">
+            <span id="username"></span>
+            <a href="index.html" id="abmeldeButton" onclick="logout()" style="display: none;">Abmelden</a>
+        </nav>
+    </header>
+
+    <!-- Raumansicht mit Chat und Video -->
+    <div id="roomPage">
+        <div class="body-left chat-section">
+            <h2>Chatbereich</h2>
+            <div id="chatBox" class="chat-box">
+                <!-- Chat-Inhalte -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatMessage" placeholder="Nachricht eingeben" onkeydown="if (event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+        <div class="body-right video-section">
+            <h2>Videobereich</h2>
+            <div class="video-grid"></div>
+            <div class="controls">
+                <button id="toggleMicButton" onclick="toggleMic()">🎤 Aktiviert</button>
+                <button id="toggleVideoButton" onclick="toggleVideo()">📹 An</button>
+                <button onclick="shareScreen()">🖥️ Teilen</button>
+                <a href="afterLogin.html"><button onclick="endCall()">📞 Beenden</button></a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Zeige den Benutzernamen beim Laden der Seite
+        document.addEventListener("DOMContentLoaded", () => {
+            const username = getName(); // Lese den Namen aus localStorage
+            if (username) {
+                document.getElementById("username").textContent = username;
+                document.getElementById("username").style.display = "inline";
+                startMedia();
+            }
+        });
+    </script>
+</body>
+</html>
