@@ -45,14 +45,16 @@
     </div>
     <script>
         // Zeige den Benutzernamen beim Laden der Seite
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async() => {
             const username = getName(); // Lese den Namen aus localStorage
             if (username) {
                 document.getElementById("username").textContent = username;
                 document.getElementById("username").style.display = "inline";
-                startMedia();
+                await startMedia();
+                startCall();
             }
         });
     </script>
+    
 </body>
 </html>
