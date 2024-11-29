@@ -254,3 +254,7 @@ async function startCall() {
         sendSignal(peerID, { sdp: offer });
     }
 }
+
+function getName(){
+    return localStorage.getItem("username");
+}
